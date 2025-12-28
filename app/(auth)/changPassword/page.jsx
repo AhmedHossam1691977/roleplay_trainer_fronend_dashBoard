@@ -4,7 +4,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import toast, { Toaster } from 'react-hot-toast';
 
-const baseUrl = 'https://final-pro-api-j1v7.onrender.com';
+const baseUrl = 'https://roleplay-trainer-api.vercel.app';
 
 export default function ChangePassword() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();

@@ -8,7 +8,7 @@ import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-const baseUrl = 'https://final-pro-api-j1v7.onrender.com';
+const baseUrl = 'https://roleplay-trainer-api.vercel.app';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),

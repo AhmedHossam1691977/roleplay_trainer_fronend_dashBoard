@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 
-const baseUrl = 'https://final-pro-api-j1v7.onrender.com';
+const baseUrl = 'https://roleplay-trainer-api.vercel.app';
 
 const forgetPasswordSchema = z.object({
   email: z.string().email('Invalid email address'),
