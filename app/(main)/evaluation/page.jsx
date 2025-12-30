@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import EvaluationDetails from './evaluation/Evaluation.jsx';
 import { ChevronLeft, ChevronRight, CheckCircle2, XCircle } from 'lucide-react';
+import Loading from '../../loading.jsx';
 
 export default function EvaluationsPage() {
   const [data, setData] = useState(null);
@@ -31,7 +32,9 @@ export default function EvaluationsPage() {
 
   const totalPages = data?.totalPages || 1;
 
-  if (!data) return <div className="p-10 text-center font-sans text-gray-500 animate-pulse">Loading Evaluations...</div>;
+  if (!data)  {
+    return   <Loading/>
+  }
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen font-sans">

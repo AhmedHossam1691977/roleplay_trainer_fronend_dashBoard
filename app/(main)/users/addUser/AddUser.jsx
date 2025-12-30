@@ -60,16 +60,15 @@ export default function AddUser({ onClose, onUserAdded }) {
 
       const result = await res.json();
 console.log(result);
-
-      if (!res.ok || result.status !== true) {
-        throw new Error(result.message || 'Failed to create user');
+       if(result.success === true){
+    setSuccessMsg(result.message || 'User created successfully!');
+        
+      }
+      if ( result.status === "error") {
+        setApiError(result.message || 'Failed to create user');
       }
 
-      // ✅ النجاح
-      setSuccessMsg('User created successfully!');
-      if (onUserAdded) onUserAdded(result.user);
-      
-      // إغلاق المودال بعد ثانية واحدة
+    
       setTimeout(() => {
         if (onClose) onClose();
       }, 1500);
@@ -83,9 +82,9 @@ console.log(result);
     <div className="w-full max-w-2xl mx-auto">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         
-        {/* 🔴 رسائل الخطأ والنجاح */}
-        {apiError && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-xs font-bold uppercase">{apiError}</div>}
+      
         {successMsg && <div className="bg-emerald-50 text-emerald-600 p-3 rounded-xl text-xs font-bold uppercase">{successMsg}</div>}
+        {apiError && <div className="bg-red-50 text-red-600 p-3 rounded-xl text-xs font-bold uppercase">{apiError}</div>}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Clock, Calendar, ShieldCheck, Eye } from 'lucide-react';
 import DetailsSession from './detailsSession/DetailsSession.jsx';
+import Loading from '../../loading.jsx';
 
 export default function SessionsPage() {
   const [data, setData] = useState(null);
@@ -22,7 +23,7 @@ export default function SessionsPage() {
 
   const totalPages = data?.totalPages || 1;
 
-  if (loading) return <div className="p-10 text-center font-sans text-gray-500 animate-pulse">Loading Sessions...</div>;
+  if (loading) return  <Loading/>
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen font-sans">

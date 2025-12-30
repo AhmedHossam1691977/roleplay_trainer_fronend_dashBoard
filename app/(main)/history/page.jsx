@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Eye, X, Calendar, Activity } from 'lucide-react'; 
 import HistoryDetails from './historyDeteails/HistoryDetails.jsx';
+import Loading from '../../loading.jsx';
 
 export default function PageHistory() {
   const [sessions, setSessions] = useState([]);
@@ -43,7 +44,7 @@ export default function PageHistory() {
     fetchHistory();
   }, []);
 
-  if (loading) return <div className="p-20 text-center text-gray-500 animate-pulse">Loading history...</div>;
+  if (loading) return <Loading/>
 
   return (
     <div className="p-4 md:p-6 relative min-h-screen bg-gray-50/50">

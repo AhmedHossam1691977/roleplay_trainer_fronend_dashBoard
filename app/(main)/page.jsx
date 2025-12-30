@@ -5,6 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { TrendingUp, Users, Target, Award } from 'lucide-react';
+import Loading from '../loading.jsx';
 
 export default function Home() {
   const [data, setData] = useState(null);
@@ -19,6 +20,8 @@ export default function Home() {
     })
       .then(res => res.json())
       .then(result => {
+        console.log(result);
+        
         setData(result.data);
         console.log(result);
         
@@ -29,9 +32,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-lg font-semibold text-gray-500">
-        Loading Dashboard...
-      </div>
+      <Loading/>
     );
   }
 
@@ -96,7 +97,8 @@ export default function Home() {
     <div className="min-h-screen p-6 bg-gray-50">
       <div className="max-w-7xl mx-auto">
 
-        <h1 className="text-3xl font-bold mb-8 text-gray-800">Analytics Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-8 text-gray-800">Analytics Dashboard <span className="text-blue-500">📊</span> </h1>
+
 
         {/* ================= Cards ================= */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">

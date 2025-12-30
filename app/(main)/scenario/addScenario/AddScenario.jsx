@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 
 export default function AddScenario() {
-  const baseUrl = 'https://roleplay-trainer-api.vercel.app';
+  const baseUrl = 'https://final-pro-api-j1v7.onrender.com';
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState({ type: null, message: '' }); 
 

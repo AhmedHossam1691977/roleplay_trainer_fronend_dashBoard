@@ -3,20 +3,16 @@ import { NextResponse } from 'next/server';
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 
-
   const publicRoutes = [
     '/login',
     '/forgetPassword',
     '/verifyResetCode',
     '/resetPassword',
+    '/register',
   ];
 
-
-  const adminRoutes = [
-    '/users',
-"/session",
-"/evaluation"
-  ];
+  const adminRoutes = ['/users', '/session', '/evaluation'];
+  const superAdminOnlyRoutes = ['/plans/add'];
 
 
   if (
@@ -28,21 +24,50 @@ export function middleware(request) {
   }
 
   const token = request.cookies.get('token')?.value;
-  const role  = request.cookies.get('role')?.value;
+  const userDataRaw = request.cookies.get('user')?.value;
 
-  /* مش عامل login */
+  let user = null;
+  if (userDataRaw) {
+    try {
+      user = JSON.parse(decodeURIComponent(userDataRaw));
+    } catch (error) {
+      console.error('Error parsing user cookie:', error);
+    }
+  }
+
+  
   if (!token && !publicRoutes.includes(pathname)) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  /* عامل login و رايح auth */
+
   if (token && publicRoutes.includes(pathname)) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  /* حماية صفحات الـ Admin */
+
+  if (user && user.role === 'admin' && user.subscriptions !== true) {
+  
+     const allowedForUnsubscribed = ['/plans', '/']; 
+     
+     if (!allowedForUnsubscribed.includes(pathname)) {
+        return NextResponse.redirect(new URL('/plans', request.url));
+     }
+  }
+
+  
+  if (user?.role === 'super-admin') {
+    return NextResponse.next();
+  }
+
+  
+  if (superAdminOnlyRoutes.some(route => pathname.startsWith(route))) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
+
   if (adminRoutes.some(route => pathname.startsWith(route))) {
-    if (role !== 'admin') {
+    if (user?.role !== 'admin') {
       return NextResponse.redirect(new URL('/', request.url));
     }
   }

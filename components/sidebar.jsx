@@ -21,17 +21,24 @@ export default function Sidebar() {
   });
 
   const menuItems = [
-    { icon: Home, label: 'Dashboard', link: '/' },
+    { icon: Home, label: 'Dashboard', link: '/'  },
     { icon: MessageSquare, label: 'Scenarios', link: '/scenario' },
-    { icon: BarChart3, label: 'Results & Analytics', link: '/results' ,role:"user" },
-    { icon: Clock, label: 'History', link: '/history' , role: 'user'},
-    { icon: GraduationCap, label: 'Evaluation', link: '/evaluation' , role: 'admin'},
-    { icon: Users, label: 'User Management', link: '/users', role: 'admin' },
-    { icon: NotebookTabs , label: 'Session Management', link: '/session', role: 'admin' },
+    { icon: BarChart3, label: 'Results & Analytics', link: '/results' ,role:['admin', "user"] },
+    { icon: Clock, label: 'History', link: '/history' , role: ['user', 'super-admin']},
+    { icon: GraduationCap, label: 'Evaluation', link: '/evaluation' , role: ['admin', 'super-admin']},
+    { icon: Users, label: 'User Management', link: '/users', role: ['admin', 'super-admin'] },
+    { icon: NotebookTabs , label: 'Session Management', link: '/session', role: ['admin', 'super-admin'] },
+    { icon: NotebookTabs , label: 'Session Management', link: '/plans', role: [ 'super-admin'] },
+
 
   ];
 
-  const filteredMenuItems = menuItems.filter(item => !item.role || item.role === user.role);
+const filteredMenuItems = menuItems.filter(item => {
+  if (!item.role) return true;
+  return item.role.includes(user.role);
+});
+
+
 
 const handleLogout = () => {
   
@@ -62,6 +69,7 @@ const handleLogout = () => {
         <div className="flex items-center gap-2 font-bold text-blue-600">
           <GraduationCap size={24} />
           <span className="text-sm">Roleplay AI</span>
+          
         </div>
         <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
           {getUserInitials()}
@@ -89,8 +97,15 @@ const handleLogout = () => {
             <div className="min-w-0">
               <h1 className="font-bold text-gray-900 truncate leading-tight">AI Trainer</h1>
               <p className="text-[10px] text-gray-400 font-medium tracking-wider uppercase">Roleplay Platform</p>
+
             </div>
           )}
+          <Link
+  href="/plans"
+  className="text-[12px] text-red-500 font-bold underline underline-offset-2 tracking-wider uppercase"
+>
+  Plans
+</Link>
         </div>
 
         {/* Navigation Links */}
