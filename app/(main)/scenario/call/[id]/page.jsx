@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Vapi from "@vapi-ai/web"; // استيراد المكتبة
+import Vapi from "@vapi-ai/web"; 
 import { 
   PhoneOff, Mic, Loader2, ArrowLeft, 
   MessageSquare, User, Bot, AlertCircle 
@@ -11,28 +11,27 @@ export default function CallPage() {
   const { id } = useParams();
   const router = useRouter();
   
-  // Refs & States
-  const vapiRef = useRef(null); // تخزين الـ instance الخاص بـ Vapi
+  const vapiRef = useRef(null); 
   const [isCallActive, setIsCallActive] = useState(false);
   const [transcript, setTranscript] = useState({ role: '', text: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 1. إعداد Vapi عند أول رندر
   useEffect(() => {
-    // استبدل هذا بالمفتاح العام الخاص بك (Public Key)
     const vapi = new Vapi("f4643b74-cff4-4c12-b214-deb65e2f58c5");
     vapiRef.current = vapi;
 
-    // مستمعي الأحداث (Event Listeners)
     vapi.on("call-start", () => {
       setIsCallActive(true);
       setLoading(false);
+      setError(null);
     });
 
+  
     vapi.on("call-end", () => {
       setIsCallActive(false);
       setLoading(false);
+      router.back(); 
     });
 
     vapi.on("message", (message) => {
@@ -41,19 +40,18 @@ export default function CallPage() {
       }
     });
 
+    
     vapi.on("error", (e) => {
       console.error("Vapi Error:", e);
-      setError("حدث خطأ في الاتصال الصوتي");
       setLoading(false);
+      router("scenario"); 
     });
 
-    // تنظيف الاتصال عند مغادرة الصفحة
     return () => {
       vapi.stop();
     };
-  }, []);
+  }, [router]);
 
-  // 2. دالة بدء المكالمة (استدعاء الـ Backend أولاً)
   const startSession = async () => {
     try {
       setLoading(true);
@@ -74,22 +72,24 @@ export default function CallPage() {
 
       const config = await response.json();
 
-      if (!response.ok) throw new Error(config.message || "Failed to get config");
 
+      if (!response.ok) {
+        router.back();
+        return;
+      }
 
       vapiRef.current.start(config.assistant);
 
     } catch (err) {
       console.error("Fetch Error:", err);
-      setError(err.message);
       setLoading(false);
+      router("scenario"); 
     }
   };
 
-  // 3. دالة إنهاء المكالمة
   const endSession = () => {
     vapiRef.current.stop();
-    router.back();
+      router("scenario"); 
   };
 
   return (
@@ -108,7 +108,6 @@ export default function CallPage() {
 
       {/* Main UI */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 relative">
-        {/* Wave Animation when Active */}
         {isCallActive && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-64 h-64 bg-blue-500/20 rounded-full animate-ping blur-xl"></div>
@@ -140,13 +139,6 @@ export default function CallPage() {
               {transcript.role}
             </div>
             <p className="text-sm text-slate-300 italic">{transcript.text}</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="mt-4 flex items-center gap-2 text-red-400 bg-red-400/10 px-4 py-2 rounded-lg border border-red-400/20">
-            <AlertCircle size={16} />
-            <span className="text-xs font-medium">{error}</span>
           </div>
         )}
       </div>
