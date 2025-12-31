@@ -4,7 +4,7 @@ import Link from 'next/link'
 export default function Upgrade() {
   return (
     <>
-      <div className="bg-red-600 text-white text-center py-2 px-4 fixed top-0 right-0 left-0 lg:left-64 z-50 flex justify-center items-center gap-4 shadow-md">
+      <div className="bg-red-600 text-white text-center py-2 px-4 relative w-100% top-0 right-0 left-0 bottom-0 z-0 flex justify-center items-center gap-4 shadow-md">
         <span className="font-medium text-sm md:text-base">
           Your account is not active. Please upgrade to access all features.
         </span>

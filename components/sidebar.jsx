@@ -3,28 +3,47 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, GraduationCap, MessageSquare, BarChart3, Clock, LogOut, Menu, X, Users, NotebookTabs } from 'lucide-react';
+import Upgrade from './Upgrade.jsx';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
   
-  const [user, setUser] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          return JSON.parse(storedUser);
-        } catch (err) {
-          console.error('Failed to parse user:', err);
-        }
+  const [user, setUser] = useState({ userName: '', role: '', subscriptions: false });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      } catch (err) {
+        console.error('Failed to parse user from localStorage:', err);
       }
     }
-    return { userName: '', role: '' };
-  });
 
-  // مصفوفة القائمة
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    };
+
+    const userCookieValue = getCookie('user');
+    if (userCookieValue) {
+      try {
+        const decodedUser = JSON.parse(decodeURIComponent(userCookieValue));
+        if (decodedUser.role === 'admin' && decodedUser.subscriptions !== true) {
+          setShowUpgradeBanner(true);
+        }
+      } catch (e) {
+        console.error("Error parsing user cookie", e);
+      }
+    }
+  }, []);
+
   const menuItems = [
     { icon: Home, label: 'Dashboard', link: '/' },
     { icon: MessageSquare, label: 'Scenarios', link: '/scenario' },
@@ -41,7 +60,6 @@ export default function Sidebar() {
     return item.role.includes(user.role);
   });
 
-  // التحقق هل المستخدم مسموح له رؤية Plans (أي شخص غير الـ user)
   const canSeePlans = user.role !== 'user';
 
   const handleLogout = () => {
@@ -61,60 +79,69 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Fixed Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-[60] h-16 flex items-center justify-between px-4">
-        <button 
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-          className="p-2 hover:bg-gray-100 rounded-lg text-gray-600"
-        >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-
-        <div className="flex items-center gap-2 font-bold text-blue-600">
-          <GraduationCap size={24} />
-          <span className="text-sm">Roleplay AI</span>
-        </div>
-
-        <div className="relative">
+      {/* Mobile Fixed Header Container 
+          z-[70] لضمان بقائه فوق الـ Sidebar (z-58)
+      */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-[70] flex flex-col shadow-sm">
+        
+        {/* Row 1: Navbar */}
+        <div className="h-16 flex items-center justify-between px-4 w-full">
           <button 
-            onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-            className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+            className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"
           >
-            {getUserInitials()}
+            {/* التبديل بين شكل القائمة و علامة X */}
+            {isMobileMenuOpen ? <X size={24} className="text-blue-600" /> : <Menu size={24} />}
           </button>
 
-          {isUserDropdownOpen && (
-            <>
-              <div className="fixed inset-0 z-10" onClick={() => setIsUserDropdownOpen(false)} />
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-xl z-20 py-2 animate-in fade-in zoom-in duration-150 origin-top-right">
-                <div className="px-4 py-2 border-b border-gray-50">
-                  <p className="text-xs font-bold text-gray-900 truncate">{user.userName || 'Guest'}</p>
-                  <p className="text-[10px] text-gray-400 uppercase">{user.role || 'User'}</p>
-                </div>
+          <div className="flex items-center gap-2 font-bold text-blue-600">
+            <GraduationCap size={24} />
+            <span className="text-sm">Roleplay AI</span>
+          </div>
 
-                {/* تظهر فقط إذا لم يكن user */}
-                {canSeePlans && (
-                  <Link
-                    href="/plans"
-                    onClick={() => setIsUserDropdownOpen(false)}
-                    className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-colors uppercase tracking-wider ${
-                      pathname === '/plans' ? 'bg-red-50 text-red-600' : 'text-red-500 hover:bg-red-50'
-                    }`}
+          <div className="relative">
+            <button 
+              onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+              className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold"
+            >
+              {getUserInitials()}
+            </button>
+
+            {isUserDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setIsUserDropdownOpen(false)} />
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-xl z-20 py-2 animate-in fade-in zoom-in duration-150 origin-top-right">
+                  <div className="px-4 py-2 border-b border-gray-50">
+                    <p className="text-xs font-bold text-gray-900 truncate">{user.userName || 'Guest'}</p>
+                    <p className="text-[10px] text-gray-400 uppercase">{user.role || 'User'}</p>
+                  </div>
+                  {canSeePlans && (
+                    <Link
+                      href="/plans"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-red-500 hover:bg-red-50 transition-colors uppercase tracking-wider"
+                    >
+                      Plans
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 w-full px-4 py-2.5 text-xs text-gray-600 font-bold hover:bg-gray-50 transition-colors border-t border-gray-50 uppercase"
                   >
-                    Plans
-                  </Link>
-                )}
-
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 w-full px-4 py-2.5 text-xs text-gray-600 font-bold hover:bg-gray-50 transition-colors border-t border-gray-50 uppercase"
-                >
-                  <LogOut size={14} /> Sign Out
-                </button>
-              </div>
-            </>
-          )}
+                    <LogOut size={14} /> Sign Out
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
+
+        {/* Row 2: Upgrade Banner */}
+        {showUpgradeBanner && (
+          <div className="px-4 pb-3 w-full animate-in slide-in-from-top duration-300">
+            <Upgrade />
+          </div>
+        )}
       </div>
 
       {/* Sidebar Navigation */}
@@ -124,8 +151,8 @@ export default function Sidebar() {
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-        {/* Logo Section - Desktop */}
-        <div className="p-4 h-16 border-b border-gray-100 hidden lg:flex items-center gap-3 overflow-hidden">
+        {/* Logo Section - Desktop Only */}
+        <div className="p-4 h-16 border-b border-gray-100 hidden lg:flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-600 rounded-lg flex-shrink-0 flex items-center justify-center text-white">
             <GraduationCap size={24} />
           </div>
@@ -135,21 +162,14 @@ export default function Sidebar() {
               <p className="text-[10px] text-gray-400 font-medium tracking-wider uppercase">Roleplay Platform</p>
             </div>
           )}
-          {/* Plans تظهر في الديسكتوب فقط لمن ليس user */}
-          {!isCollapsed && canSeePlans && (
-             <Link
-             href="/plans"
-             className={`text-[10px] font-bold underline underline-offset-2 tracking-wider uppercase ml-auto transition-colors ${
-                pathname === '/plans' ? 'text-blue-600' : 'text-red-500 hover:text-red-600'
-             }`}
-           >
-             Plans
-           </Link>
-          )}
         </div>
 
-        {/* Links */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto mt-16 lg:mt-0 pt-4">
+        {/* Links Navigation 
+            تعديل المسافات العلوية لتبدأ الـ items تحت الناف بار الموبايل مباشرة
+        */}
+        <nav className={`flex-1 p-3 space-y-1 overflow-y-auto pt-4 
+          ${showUpgradeBanner ? 'mt-[120px] lg:mt-0' : 'mt-[64px] lg:mt-0'}
+        `}>
           {filteredMenuItems.map((item, index) => {
             const isActive = pathname === item.link;
             return (
@@ -170,36 +190,28 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Profile Footer (Desktop) */}
-        <div className="hidden lg:block p-4 border-t border-gray-100 bg-gray-50/50">
+        {/* Profile Footer - Desktop Only */}
+        <div className="p-4 border-t border-gray-100 bg-gray-50/50 hidden lg:block">
           {!isCollapsed && (
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white border border-gray-200 text-blue-600 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0">
+                <div className="w-10 h-10 bg-white border border-gray-200 text-blue-600 rounded-full flex items-center justify-center font-bold text-xs">
                   {getUserInitials()}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate tracking-tight">{user.userName || 'Guest User'}</p>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase">{user.role || 'Trainee'}</p>
+                  <p className="text-sm font-semibold text-gray-900 truncate">{user.userName || 'Guest'}</p>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase">{user.role}</p>
                 </div>
               </div>
-              <button 
-                onClick={handleLogout} 
-                className="flex items-center gap-2 w-full px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors text-xs font-bold uppercase"
-              >
+              <button onClick={handleLogout} className="flex items-center gap-2 text-red-500 hover:bg-red-50 p-2 rounded-lg text-xs font-bold uppercase">
                 <LogOut size={16} /> Sign Out
               </button>
             </div>
           )}
-          {isCollapsed && (
-            <button onClick={handleLogout} className="w-full flex justify-center text-red-500 hover:bg-red-50 p-2 rounded-lg">
-              <LogOut size={20} />
-            </button>
-          )}
         </div>
       </aside>
 
-      {/* Mobile Overlay */}
+      {/* Overlay */}
       {isMobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[55]" onClick={() => setIsMobileMenuOpen(false)} />
       )}
