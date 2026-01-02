@@ -1,10 +1,11 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Mail, ShieldCheck, Loader2, Trash2, Eye, RefreshCw, X, UserCheck, Edit3, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Mail, ShieldCheck, Loader2, Trash2, Eye, RefreshCw, X, UserCheck, Edit3, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import UserDetails from '../userDetails/UserDetails.jsx';
 import UpdateUser from '../updateUser/UpdateUser.jsx';
 
 export default function AllUsers({ searchTerm, filters }) {
+  const baseUrl = "https://roleplay-trainer-api.vercel.app";
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [paginationData, setPaginationData] = useState({
@@ -14,26 +15,30 @@ export default function AllUsers({ searchTerm, filters }) {
   });
   const [currentPage, setCurrentPage] = useState(1);
   
+  // Modals States
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [userToUpdate, setUserToUpdate] = useState(null);
 
+  // --- New States for Custom Delete Pop-up ---
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+
   useEffect(() => {
-    if (isModalOpen || isUpdateModalOpen) {
+    if (isModalOpen || isUpdateModalOpen || isDeleteModalOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => { document.body.style.overflow = 'unset'; };
-  }, [isModalOpen, isUpdateModalOpen]);
+  }, [isModalOpen, isUpdateModalOpen, isDeleteModalOpen]);
 
-  // دالة جلب البيانات مع دعم رقم الصفحة
   const fetchUsers = async (page = 1) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://roleplay-trainer-api.vercel.app/api/v1/user?page=${page}`, {
+      const response = await fetch(`${baseUrl}/api/v1/user?page=${page}`, {
         headers: { 'token': token }
       });
       const data = await response.json();
@@ -56,23 +61,35 @@ export default function AllUsers({ searchTerm, filters }) {
     fetchUsers(currentPage);
   }, [currentPage]);
 
-  const handleToggleDelete = async (userId, currentDeleteStatus) => {
+  // Function to handle showing the confirmation modal
+  const openDeleteConfirm = (user) => {
+    if (user.isDeleted) {
+      // If user is already deleted, restore directly
+      executeToggleDelete(user._id, user.isDeleted);
+    } else {
+      // Show confirmation pop-up for deletion
+      setUserToDelete(user);
+      setIsDeleteModalOpen(true);
+    }
+  };
+
+  // The actual API call
+  const executeToggleDelete = async (userId, currentDeleteStatus) => {
     const originalUsers = [...users];
     setUsers(currentUsers => 
       currentUsers.map(u => u._id === userId ? { ...u, isDeleted: !currentDeleteStatus } : u)
     );
+    setIsDeleteModalOpen(false);
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://roleplay-trainer-api.vercel.app/api/v1/user/${userId}`, {
+      const response = await fetch(`${baseUrl}/api/v1/user/${userId}`, {
         method: 'DELETE',
         headers: { 'token': `${token}` }
       });
-      const data = await response.json();
-      if (!response.ok ) throw new Error('فشل التحديث');
+      if (!response.ok) throw new Error('failed to delete user');
     } catch (err) {
       setUsers(originalUsers);
-      alert("تعذر تحديث الحالة");
     }
   };
 
@@ -94,7 +111,7 @@ export default function AllUsers({ searchTerm, filters }) {
 
   return (
     <div className="relative pb-20">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 mb-6">
           <div className="flex flex-col">
             <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Page</span>
             <span className="text-sm font-black text-gray-800">{paginationData.page} <span className="text-gray-300 mx-1">/</span> {paginationData.totalPages}</span>
@@ -104,14 +121,8 @@ export default function AllUsers({ searchTerm, filters }) {
             <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Total Users</span>
             <span className="text-sm font-black text-gray-800">{paginationData.length}</span>
           </div>
-          <div className="w-px h-8 bg-gray-100" />
-          <div className="flex flex-col">
-            <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Status</span>
-            <span className="text-[10px] font-black text-emerald-500 uppercase flex items-center gap-1">
-              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> Live
-            </span>
-          </div>
         </div>
+
       <div className="overflow-x-auto">
         <table className="w-full text-left border-separate border-spacing-y-3">
           <thead>
@@ -151,7 +162,7 @@ export default function AllUsers({ searchTerm, filters }) {
                   <div className="flex items-center justify-center gap-2">
                     <button onClick={() => { setSelectedUserId(user._id); setIsModalOpen(true); }} className="p-2 text-blue-500 hover:bg-blue-50 rounded-xl transition-all"><Eye size={18} /></button>
                     <button onClick={() => { setUserToUpdate(user); setIsUpdateModalOpen(true); }} className="p-2 text-emerald-500 hover:bg-emerald-50 rounded-xl transition-all"><Edit3 size={18} /></button>
-                    <button onClick={() => handleToggleDelete(user._id, user.isDeleted)} className={`p-2 rounded-xl border ${user.isDeleted ? 'text-orange-600 bg-orange-50' : 'text-red-500 bg-red-50'}`}>
+                    <button onClick={() => openDeleteConfirm(user)} className={`p-2 rounded-xl border ${user.isDeleted ? 'text-orange-600 bg-orange-50' : 'text-red-500 bg-red-50'}`}>
                       {user.isDeleted ? <RefreshCw size={18} /> : <Trash2 size={18} />}
                     </button>
                   </div>
@@ -162,42 +173,37 @@ export default function AllUsers({ searchTerm, filters }) {
         </table>
       </div>
 
-      {/* Pagination & Stats Section */}
-      <div className="mt-8 flex flex-col md:flex-row items-center justify-center gap-4 px-2">
-        <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
-          <button 
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(prev => prev - 1)}
-            className="p-2 rounded-xl hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          
-          {[...Array(paginationData.totalPages)].map((_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${
-                currentPage === i + 1 
-                ? 'bg-blue-600 text-white shadow-lg shadow-gray-200' 
-                : 'text-gray-400 hover:bg-gray-50'
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-
-          <button 
-            disabled={currentPage === paginationData.totalPages}
-            onClick={() => setCurrentPage(prev => prev + 1)}
-            className="p-2 rounded-xl hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
-          >
-            <ChevronRight size={20} />
-          </button>
+      {/* --- Custom Delete Confirmation Modal (Div Pop-up) --- */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl border border-gray-100 p-8 text-center animate-in zoom-in-95 duration-200">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
+              <AlertCircle size={40} />
+            </div>
+            <h3 className="text-xl font-black text-gray-900 mb-2 tracking-tight">Are you sure?</h3>
+            <p className="text-gray-500 text-sm font-medium mb-8 leading-relaxed">
+              You are about to delete <span className="font-bold text-gray-800">{userToDelete?.name}</span>. 
+              This user will no longer be able to access the system.
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="flex-1 px-6 py-4 rounded-2xl bg-gray-100 text-gray-600 font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => executeToggleDelete(userToDelete._id, userToDelete.isDeleted)}
+                className="flex-1 px-6 py-4 rounded-2xl bg-red-600 text-white font-black text-xs uppercase tracking-widest hover:bg-red-700 shadow-lg shadow-red-200 transition-all"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Modals remain the same... */}
+      {/* Other Modals */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white">
           <div className="absolute top-0 w-full h-20 bg-white border-b flex items-center justify-between px-12">

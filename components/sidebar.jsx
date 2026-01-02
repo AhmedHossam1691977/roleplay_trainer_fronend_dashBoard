@@ -52,7 +52,7 @@ export default function Sidebar() {
     { icon: GraduationCap, label: 'Evaluation', link: '/evaluation', role: ['admin', 'super-admin']},
     { icon: Users, label: 'User Management', link: '/users', role: ['admin', 'super-admin'] },
     { icon: NotebookTabs, label: 'Session Management', link: '/session', role: ['admin', 'super-admin'] },
-    { icon: NotebookTabs, label: 'Plans Management', link: '/plans', role: ['super-admin'] },
+    { icon: NotebookTabs, label: 'Plans Management', link: '/plansManagement', role: ['super-admin'] },
   ];
 
   const filteredMenuItems = menuItems.filter(item => {
@@ -90,13 +90,13 @@ export default function Sidebar() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
             className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"
           >
-            {/* التبديل بين شكل القائمة و علامة X */}
+        
             {isMobileMenuOpen ? <X size={24} className="text-blue-600" /> : <Menu size={24} />}
           </button>
 
           <div className="flex items-center gap-2 font-bold text-blue-600">
             <GraduationCap size={24} />
-            <span className="text-sm">Roleplay AI</span>
+            <span className="text-sm">AI Coach</span>
           </div>
 
           <div className="relative">
@@ -158,7 +158,7 @@ export default function Sidebar() {
           </div>
           {!isCollapsed && (
             <div className="min-w-0 flex-1">
-              <h1 className="font-bold text-gray-900 truncate leading-tight">AI Trainer</h1>
+              <h1 className="font-bold text-gray-900 truncate leading-tight">AI Coach</h1>
               <p className="text-[10px] text-gray-400 font-medium tracking-wider uppercase">Roleplay Platform</p>
             </div>
           )}
