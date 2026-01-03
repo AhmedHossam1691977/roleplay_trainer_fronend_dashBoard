@@ -1,33 +1,37 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function InnerNavbar({ items, onTabChange, activeTabLabel }) {
+export default function InnerNavbar({ items = [], onTabChange, activeTabLabel }) {
 
+  const [user, setUser] = useState({ userName: '', role: '' });
 
-const [user, setUser] = useState(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedUser = localStorage.getItem('user');
+      console.log(storedUser);
+      
       if (storedUser) {
         try {
-          return JSON.parse(storedUser);
+          setUser(JSON.parse(storedUser));
         } catch (err) {
           console.error('Failed to parse user:', err);
         }
       }
     }
-    return { userName: '', role: '' };
+  }, []);
+
+
+  const filteredItems = items.filter((item) => {
+    console.log(items);
+    
+    if (!item.role) return true;
+    return item.role.includes(user.role);
   });
-
-
-  
-  
-    const filteredItems = items.filter(item => !item.role || item.role === user.role);
-
 
   return (
     <div className="w-full mb-8 relative">
       <nav className="flex flex-wrap items-center gap-2 p-1.5 bg-gray-100/80 backdrop-blur-md rounded-2xl w-fit border border-gray-200">
-        {filteredItems.map((item, index) => {
+        {filteredItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTabLabel === item.label;
 

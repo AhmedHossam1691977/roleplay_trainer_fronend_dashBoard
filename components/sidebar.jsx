@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, GraduationCap, MessageSquare, BarChart3, Clock, LogOut, Menu, X, Users, NotebookTabs } from 'lucide-react';
+import { Home, GraduationCap, MessageSquare, BarChart3, Clock,CreditCard, LogOut, Menu, X, Users, NotebookTabs } from 'lucide-react';
 import Upgrade from './Upgrade.jsx';
 
 export default function Sidebar() {
@@ -48,11 +48,11 @@ export default function Sidebar() {
     { icon: Home, label: 'Dashboard', link: '/' },
     { icon: MessageSquare, label: 'Scenarios', link: '/scenario' },
     { icon: BarChart3, label: 'Results & Analytics', link: '/results', role: ['admin', "user"] },
-    { icon: Clock, label: 'History', link: '/history', role: ['user', 'super-admin']},
+    { icon: Clock, label: 'History', link: '/history', role: ['user']},
     { icon: GraduationCap, label: 'Evaluation', link: '/evaluation', role: ['admin', 'super-admin']},
     { icon: Users, label: 'User Management', link: '/users', role: ['admin', 'super-admin'] },
     { icon: NotebookTabs, label: 'Session Management', link: '/session', role: ['admin', 'super-admin'] },
-    { icon: NotebookTabs, label: 'Plans Management', link: '/plansManagement', role: ['super-admin'] },
+    { icon: CreditCard, label: 'Plans Management', link: '/plansManagement', role: ['super-admin'] },
   ];
 
   const filteredMenuItems = menuItems.filter(item => {

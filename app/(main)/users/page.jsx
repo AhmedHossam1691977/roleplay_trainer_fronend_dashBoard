@@ -64,7 +64,7 @@ export default function UserPage() {
         onTabChange={(label) => setCurrentView(label)} 
         items={[
           { icon: Users, label: 'All Users' },
-          { icon: UserPlus, label: 'Add User', role: 'admin' }
+          { icon: UserPlus, label: 'Add User', role: ['admin','super-admin'] }
         ]}
       />
 

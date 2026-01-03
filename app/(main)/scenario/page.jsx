@@ -72,7 +72,7 @@ export default function ScenarioPage() {
         onTabChange={(label) => setCurrentView(label)} 
         items={[
           { icon: LayoutGrid, label: 'Active Scenarios' },
-          { icon: PlusCircle, label: 'Add Scenario', role: 'admin' }
+          { icon: PlusCircle, label: 'Add Scenario', role: ['admin' ,'super-admin'] }
         ]}
       />
 

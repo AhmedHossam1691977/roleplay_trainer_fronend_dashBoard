@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+ import { NextResponse } from 'next/server';
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
@@ -8,7 +8,7 @@ export function middleware(request) {
     '/forgetPassword',
     '/verifyResetCode',
     '/resetPassword',
-    '/register',
+    '/register'
   ];
 
   const adminRoutes = ['/users', '/session', '/evaluation'];
