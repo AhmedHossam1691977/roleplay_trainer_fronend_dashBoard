@@ -17,8 +17,8 @@ const addUserSchema = z.object({
   age: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
     message: "Age must be a positive number",
   }),
-  birthDay: z.string().min(1, 'Birthday is required'),
-  phoneNumber: z.string().min(10, 'Invalid phone number'),
+  // birthDay: z.string().min(1, 'Birthday is required'),
+  // phoneNumber: z.string().min(10, 'Invalid phone number'),
   role: z.enum(['user', 'admin']),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -146,7 +146,7 @@ console.log(result);
           </div>
 
           {/* Birthday */}
-          <div>
+          {/* <div>
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Birthday</label>
             <input
               type="date"
@@ -154,10 +154,10 @@ console.log(result);
               className="w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
             />
             {errors.birthDay && <p className="text-red-500 text-[10px] mt-1 font-bold">{errors.birthDay.message}</p>}
-          </div>
+          </div> */}
 
           {/* Phone Number */}
-          <div>
+          {/* <div>
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Phone Number</label>
             <input
               {...register('phoneNumber')}
@@ -165,7 +165,7 @@ console.log(result);
               className="w-full px-4 py-2.5 bg-gray-50 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
             />
             {errors.phoneNumber && <p className="text-red-500 text-[10px] mt-1 font-bold">{errors.phoneNumber.message}</p>}
-          </div>
+          </div> */}
 
           {/* Role */}
           <div>

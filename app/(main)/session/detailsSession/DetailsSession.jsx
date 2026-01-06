@@ -13,10 +13,14 @@ export default function DetailsSession({ id, onClose }) {
     const fetchSessionDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://roleplay-trainer-api.vercel.app/api/v1/session/${id}`, {
-          headers: { 'token': localStorage.getItem('token') }
+        console.log(id);
+        
+        const response = await fetch(`https://final-pro-api-j1v7.onrender.com/api/v1/session/${id}`, {
+          headers: { token: `${localStorage.getItem('token')}` }
         });
         const json = await response.json();
+        console.log(json);
+        
         if (json.success) setSessionData(json.data);
       } catch (error) {
         console.error("Error:", error);
